@@ -1,0 +1,24 @@
+CREATE PROPERTY GRAPH online_retail
+  VERTEX TABLES (
+    customers
+      LABEL "Customer"
+      PROPERTIES (
+        customer_id AS "customer_id"
+      )
+  , products
+      LABEL "Product"
+      PROPERTIES (
+        stock_code AS "stock_code"
+      )
+  )
+  EDGE TABLES (
+    purchases
+      KEY (purchase_id)
+      SOURCE KEY(customer_id) REFERENCES customers
+      DESTINATION KEY(stock_code) REFERENCES products
+      LABEL "purchased"
+      PROPERTIES (
+        quantity AS "quantity"
+      , unit_price AS "unit_price"
+      )
+  )

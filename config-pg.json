@@ -1,0 +1,21 @@
+{
+  "format":"pg",
+  "db_engine":"rdbms",
+  "jdbc_url":"jdbc:oracle:thin:@database:1521/orclpdb1",
+  "username":"retail",
+  "keystore_alias":"database1",
+  "max_num_connections":8,
+  "name":"retail",
+  "vertex_props": [
+    { "name": "customer_id", "type": "string" },
+    { "name": "stock_code", "type": "string" }
+  ],
+  "edge_props": [
+    { "name": "quantity", "type": "integer" },
+    { "name": "unit_price", "type": "double" }
+  ],
+  "loading":{
+    "load_vertex_labels":true,
+    "load_edge_label":true
+  }
+}

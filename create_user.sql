@@ -1,0 +1,13 @@
+SET ECHO ON
+
+CREATE USER online_retail IDENTIFIED BY Welcome1
+DEFAULT TABLESPACE users
+TEMPORARY TABLESPACE temp;
+
+ALTER USER online_retail QUOTA UNLIMITED ON users;
+
+GRANT CONNECT TO online_retail;
+GRANT RESOURCE TO online_retail;
+GRANT CREATE VIEW TO online_retail;
+
+EXIT

@@ -1,0 +1,223 @@
+{
+    "version": 6,
+    "theme": "light",
+    "height": 300,
+    "similarEdges": "keep",
+    "edgeMarker": "arrow",
+    "vertexGeometry": "sphere",
+    "antiAlias": true,
+    "floorGrid": true,
+    "edgesGeometry": true,
+    "enable3DLayout": false,
+    "selectedPropZ": "",
+    "valueRangePropZ": 0.5,
+    "sortPropZ": "descending",
+    "filters": [
+        {
+            "_id": 1598974893858,
+            "type": "styling",
+            "enabled": true,
+            "conditions": {
+                "operator": "and",
+                "conditions": [
+                    {
+                        "property": "label",
+                        "operator": "=",
+                        "value": "Customer"
+                    }
+                ]
+            },
+            "component": "vertex",
+            "target": "vertex",
+            "properties": {
+                "icons": [
+                    "fa-user-man"
+                ],
+                "iconColors": [
+                    "white"
+                ],
+                "label": [
+                    "id"
+                ]
+            }
+        },
+        {
+            "_id": 1598974992651,
+            "type": "styling",
+            "enabled": true,
+            "conditions": {
+                "operator": "and",
+                "conditions": [
+                    {
+                        "property": "label",
+                        "operator": "=",
+                        "value": "Product"
+                    }
+                ]
+            },
+            "component": "vertex",
+            "target": "vertex",
+            "properties": {
+                "icons": [
+                    "fa-shopping-cart"
+                ],
+                "iconColors": [
+                    "white"
+                ],
+                "label": [
+                    "description"
+                ]
+            }
+        },
+        {
+            "_id": 1599044250716,
+            "type": "styling",
+            "enabled": true,
+            "conditions": {
+                "operator": "and",
+                "conditions": []
+            },
+            "component": "vertex",
+            "target": "vertex",
+            "properties": {
+                "sizes": [
+                    10,
+                    50
+                ]
+            },
+            "interpolation": {
+                "property": "pagerank",
+                "min": "0",
+                "max": "0.5"
+            }
+        }
+    ],
+    "smartExpands": [],
+    "smartGroups": [],
+    "vertexLabelProperty": null,
+    "edgeLabelProperty": null,
+    "vertexLabelOrientation": "bottom",
+    "vertexPositions": [],
+    "pageSize": 100,
+    "selectedPage": 0,
+    "charLimit": 10,
+    "truncateLabel": true,
+    "showTitle": true,
+    "dimension": "2d",
+    "layout": "force",
+    "layoutProperties": {
+        "circle": {
+            "avoidOverlap": true,
+            "radius": 40
+        },
+        "grid": {
+            "avoidOverlap": true,
+            "rows": 5,
+            "columns": 5
+        },
+        "concentric": {
+            "avoidOverlap": true,
+            "minimumVertexSpacing": 10
+        },
+        "force": {
+            "edgeDistance": 120,
+            "forceStrength": -30,
+            "vertexPadding": 40,
+            "velocityDecay": 0.3
+        },
+        "force3D": {
+            "attractionMultiplier": 20,
+            "repulsionMultiplier": 0.2
+        },
+        "geographical": {
+            "latitude": "latitude",
+            "longitude": "longitude"
+        },
+        "hierarchical": {
+            "rankDirection": "TB",
+            "ranker": "network-simplex",
+            "align": "",
+            "vertexSeparation": {
+                "value": 0,
+                "enabled": false
+            },
+            "edgeSeparation": {
+                "value": 0,
+                "enabled": false
+            },
+            "rankSeparation": {
+                "value": 0,
+                "enabled": false
+            }
+        },
+        "radial": {
+            "arcDegree": 360,
+            "startingPoint": "left",
+            "packing": 1,
+            "intelligentSeparation": true
+        }
+    },
+    "animateChanges": true,
+    "liveSearch": {
+        "enabled": false,
+        "enabledTypes": [],
+        "selectedColumns": [],
+        "value": "",
+        "location": 0,
+        "distance": 100,
+        "maxPatternLength": 32,
+        "minMatchCharLength": 1,
+        "advancedSettingsToggle": false,
+        "disabledSelectedColumns": []
+    },
+    "graphAction": {
+        "enabled": true,
+        "graphName": "Online Retail1",
+        "lastRun": 0,
+        "metadata": {
+            "vertexProperties": [],
+            "edgeProperties": []
+        },
+        "stack": [],
+        "index": 0,
+        "numberOfHops": 1,
+        "smartExpand": 0,
+        "smartGroup": 0
+    },
+    "interactionMode": "select",
+    "networkEvolution": {
+        "enabled": false,
+        "vertexProperty": "id",
+        "vertexEndProperty": "",
+        "dataType": "int",
+        "axis": "vertices",
+        "overview": "on",
+        "height": 100,
+        "overviewChartType": "bar",
+        "valuesToExclude": [],
+        "valuesToExcludeType": "hideBoth",
+        "stepSize": 0,
+        "edgeProperty": "id",
+        "edgeEndProperty": "",
+        "playTimeout": 1000,
+        "playStep": 1,
+        "advancedSettingsToggle": false
+    },
+    "stickyVertices": true,
+    "annotationMode": false,
+    "fitToScreen": true,
+    "viewTransform": [
+        [
+            45.32219534343267,
+            19.976675377330224,
+            0.9234964284001876,
+            1102
+        ]
+    ],
+    "showLegend": true,
+    "visibleGraphMode": {
+        "enabled": false,
+        "name": ""
+    },
+    "width": 100
+}

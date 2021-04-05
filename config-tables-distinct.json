@@ -1,0 +1,54 @@
+{
+  "jdbc_url":"jdbc:oracle:thin:@database:1521/orclpdb1",
+  "username":"online_retail",
+  "keystore_alias":"database1",
+  "name":"retail",
+  "vertex_providers": [
+    {
+      "name":"Customer",
+      "format":"rdbms",
+      "database_table_name":"CUSTOMERS",
+      "key_column":"CUSTOMER_ID",
+      "key_type":"string",
+      "props":[
+        {"name":"country", "type":"string"}
+      ]
+    },
+    {
+      "name":"Product",
+      "format":"rdbms",
+      "database_table_name":"PRODUCTS",
+      "key_column":"STOCK_CODE",
+      "key_type":"string",
+      "props":[
+        {"name":"description", "type":"string"}
+      ]
+    }
+  ],
+  "edge_providers": [
+    {
+      "name":"has_purchased",
+      "format":"rdbms",
+      "database_table_name":"PURCHASES_DISTINCT",
+      "key_column":"PURCHASE_ID",
+      "source_column":"CUSTOMER_ID",
+      "destination_column":"STOCK_CODE",
+      "source_vertex_provider":"Customer",
+      "destination_vertex_provider":"Product",
+      "props":[
+      ]
+    },
+    {
+      "name":"purchased_by",
+      "format":"rdbms",
+      "database_table_name":"PURCHASES_DISTINCT",
+      "key_column":"PURCHASE_ID",
+      "source_column":"STOCK_CODE",
+      "destination_column":"CUSTOMER_ID",
+      "source_vertex_provider":"Product",
+      "destination_vertex_provider":"Customer",
+      "props":[
+      ]
+    }
+  ]
+}
