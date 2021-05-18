@@ -10,8 +10,9 @@ Property graphs have become a useful way to model, manage, query and analyze muc
 
 The objectives of this workshop are as follows:
 
-- Build a Property Graph on data stored in Autonomous Database to model database relationships
-- Query, analyze, and visualize graphs to provide real-time product recommendations
+- Build a property graph from the data stored in database
+- Generate real-time product recommendations using graph algorithm
+- Query and visualize the graph to confirm recommendation results
 
 ### Prerequisites
 
@@ -33,31 +34,31 @@ According to [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/da
 
 You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/Concepts/cloudshellintro.htm) or any SSH client of your choice to SSH into the lab environment. Whatever method you choose, ensure the **SSH Keys** are setup for the client. Click [here](https://docs.cloud.oracle.com/en-us/iaas/Content/GSG/Tasks/testingconnection.htm ) for configuring various SSH clients to connect to OCI Compute instance.
 
-1. Start an SSH session using your private key **labkey**, **{VM IP Address}**, and **opc** user. The below step assumes you are using the SSH client from the terminal.
+1. Start an SSH session using your private key **labkey**, **<ip_address>**, and **opc** user. The below step assumes you are using the SSH client from the terminal.
 
     ```
-    <copy>ssh -i ~/oracle-pg/keys/labkey opc@{VM IP Address}</copy>
+    $ ssh -i key opc@<ip_address>
     ```
 
 2. Switch current user to **oracle**. All lab steps are run as the oracle user, so ensure in all sessions that you are connected as **oracle** before running any commands.
 
     ```
-    <copy>sudo su - oracle</copy>
+    $ sudo su - oracle
     ```
 
 ## **STEP 2** : Create the Database Schema
 
-2. Start a SQL client session and connect as the **ADMIN** user using **{ADB Admin Password}** and to **{ADB Service Name HIGH}** database service.
+2. Start a SQL client session and connect as the **ADMIN** user using **<password_admin>** and to **<service_name>** database service.
 
     ```
-    <copy>sqlplus ADMIN/{ADB Admin Password}@{ADB Service Name HIGH}</copy>
+    $ sqlplus ADMIN/<password_admin>@<service_name>
     ```
 
 3. Create the **RETAIL** database user with a suitable password. The default tablespace is `data` in ADB or `users` in DBCS.
 
     ```
     CREATE USER retail IDENTIFIED BY <password_retail>;
-    ALTER USER retail QUOTA UNLIMITED ON <data_or_users>;
+    ALTER USER retail QUOTA UNLIMITED ON <data/users>;
     ```
 
 4. Grant the required privileges to the **RETAIL** user.
@@ -71,7 +72,7 @@ You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/C
 5. Connect as the **RETAIL** user.
 
     ```
-    <copy>sqlplus retail/<password_retail>@<service_name></copy>
+    $ sqlplus retail/<password_retail>@<service_name>
     ```
 
 6. Create the **TRANSACTIONS** table.
@@ -100,7 +101,7 @@ You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/C
 2. Download the Online Retail dataset using **wget** using a direct download URL from UCI.
 
     ```
-    <copy>wget https://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx -O OnlineRetail.xlsx</copy>
+    $ wget https://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx -O OnlineRetail.xlsx
     ```
 
 3. Once the download completes, convert the Excel file to CSV format using open source **libreoffice**, as the data needs to be converted to plain text for loading.
@@ -108,7 +109,7 @@ You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/C
     - The file conversion takes a few minutes to complete.
 
     ```
-    <copy>libreoffice --headless --convert-to csv OnlineRetail.xlsx</copy>
+    $ libreoffice --headless --convert-to csv OnlineRetail.xlsx
     ```
 
     Alternatively, open with Excel and save the file as `OnlineRetail.csv` in CSV format. (Save As > File Format: CSV UTF-8)
@@ -122,7 +123,7 @@ You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/C
   Invoke SQL Loader using the following command line, replacing **{Retail Password}** and **{ADB Service Name}**.
 
     ```
-    sqlldr userid=retail/<password_retail>@<service_name> data=OnlineRetail.csv control=sqlldr.ctl log=sqlldr.log bad=sqlldr.bad direct=true
+    $ sqlldr userid=retail/<password_retail>@<service_name> data=OnlineRetail.csv control=sqlldr.ctl log=sqlldr.log bad=sqlldr.bad direct=true
     ```
 
 5. Observe that over **540k** rows get loaded from the dataset.
@@ -134,7 +135,7 @@ The transactional data that was just loaded needs to be normalized into relation
 1. Connect as the **RETAIL** user.
 
     ```
-    sqlplus retail/<password_retail>@<service_name>
+    $ sqlplus retail/<password_retail>@<service_name>
     ```
 
 2. Populate the normalized tables.
@@ -152,7 +153,7 @@ The transactional data that was just loaded needs to be normalized into relation
     , MAX(country)
     FROM transactions
     WHERE customer_id IS NOT NULL
-    AND quantity > 0
+      AND quantity > 0
     GROUP BY customer_id
     ;
 
@@ -173,8 +174,8 @@ The transactional data that was just loaded needs to be normalized into relation
     , MAX(description)
     FROM transactions
     WHERE stock_code IS NOT NULL
-    AND stock_code < 'A'
-    AND quantity > 0
+      AND stock_code < 'A'
+      AND quantity > 0
     GROUP BY stock_code
     ;
 
@@ -200,9 +201,9 @@ The transactional data that was just loaded needs to be normalized into relation
     , unit_price
     FROM transactions
     WHERE stock_code IS NOT NULL
-    AND stock_code < 'A'
-    AND customer_id IS NOT NULL
-    AND quantity > 0
+      AND stock_code < 'A'
+      AND customer_id IS NOT NULL
+      AND quantity > 0
     ;
 
     SET ECHO ON
@@ -227,9 +228,9 @@ The transactional data that was just loaded needs to be normalized into relation
     , 'cust_' || customer_id AS customer_id
     FROM transactions
     WHERE stock_code IS NOT NULL
-        AND stock_code < 'A'
-        AND customer_id IS NOT NULL
-        AND quantity > 0
+      AND stock_code < 'A'
+      AND customer_id IS NOT NULL
+      AND quantity > 0
     );
 
     SET ECHO ON
@@ -303,7 +304,7 @@ False
 Attach the created graph on memory.
 
 ```
->>> graph = session.get_graph("Moneyflows")
+>>> graph = session.get_graph("Online Retail")
 >>> graph
 PgxGraph(name: Online Retail, v: 8258, e: 532452, directed: True, memory(Mb): 10)
 ```
@@ -320,6 +321,13 @@ Try an example PGQL query.
 | 4341  | incorrectly credited C550456 see 47 |
 +---------------------------------------------+
 ```
+
+Publish the graph to make it available from other sessions.
+
+```
+>>> graph.publish()
+```
+
 
 # Lab 3: Generate Recommendation
 
@@ -414,10 +422,6 @@ Select "Online Retail" graph, and run the query below to see the paths between t
 Import [`highlights.json`](https://github.com/ryotayamanaka/oracle-pg/blob/20.3/graphs/online_retail/highlights.json) for adding icons and changing the size of nodes according to the pagerank.
 
 ![](https://user-images.githubusercontent.com/4862919/91992798-86fb7280-ed6f-11ea-9586-8b600c94a8ed.jpg)
-
-Exit from the shell to close the session.
-
-    opg-jshell> /exit
 
 ## Notebook
 
