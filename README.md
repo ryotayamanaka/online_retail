@@ -19,6 +19,10 @@ The objectives of this workshop are as follows:
 - Oracle Cloud Account
 - Graph Server (connected to Database)
   - This tutorial is tested with Graph Server **20.4** and **21.2**
+  - [Setup Graph Server with Autonomous Database](https://github.com/ryotayamanaka/setup_pg_adb)
+    - [LiveLabs](https://apexapps.oracle.com/pls/apex/dbpm/r/livelabs/workshop-attendee-2?p210_workshop_id=686&p210_type=3&session=8249369660982)
+  - [Setup Graph Server with Database Cloud Service](https://github.com/ryotayamanaka/setup_pg_dbcs)
+  - [Setup Graph Server using Docker](https://github.com/ryotayamanaka/setup_pg_docker)
 
 In this tutorial, we load the product purchase information from Database to Graph Server, for making the recommendations using graph algorithms. Since the graph algorithms can run efficiently on Graph Server, we need a Graph Server setup (= 3-tier deployment) for this use case.
 
