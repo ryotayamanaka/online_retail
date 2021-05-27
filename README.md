@@ -36,12 +36,14 @@ According to [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/da
 
 ## **STEP 1** : Login to SQL Client
 
-You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/Concepts/cloudshellintro.htm) or any SSH client of your choice to SSH into the lab environment. Whatever method you choose, ensure the **SSH Keys** are setup for the client. Click [here](https://docs.cloud.oracle.com/en-us/iaas/Content/GSG/Tasks/testingconnection.htm ) for configuring various SSH clients to connect to OCI Compute instance.
+**ADB**: Access the ADB using Oracle Cloud web console, login to the Database Actions as `ADMIN` user, and open SQL worksheet.
 
-1. Start an SSH session using your private key **labkey**, **<ip_address>**, and **opc** user. The below step assumes you are using the SSH client from the terminal.
+**DB**: You may use any SSH client of your choice to SSH into the lab environment. Whatever method you choose, ensure the **SSH Keys** are setup for the client. Click [here](https://docs.cloud.oracle.com/en-us/iaas/Content/GSG/Tasks/testingconnection.htm ) for configuring various SSH clients to connect to OCI Compute instance.
+
+1. Start an SSH session using your private key `<private_key>`, `<ip_address>`, and `opc` user. The below step assumes you are using the SSH client from the terminal.
 
     ```
-    $ ssh -i key opc@<ip_address>
+    $ ssh -i <private_key> opc@<ip_address>
     ```
 
 2. Switch current user to **oracle**. All lab steps are run as the oracle user, so ensure in all sessions that you are connected as **oracle** before running any commands.
@@ -50,22 +52,31 @@ You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/C
     $ sudo su - oracle
     ```
 
+3. Start a SQL client session and connect as the `sys` user using `<password>` and to **<service_name>** database service.
+
+    ```
+    $ sqlplus sys/<password>@<service_name> as sysdba
+    ```
+
 ## **STEP 2** : Create the Database Schema
 
-2. Start a SQL client session and connect as the **ADMIN** user using **<password_admin>** and to **<service_name>** database service.
 
-    ```
-    $ sqlplus ADMIN/<password_admin>@<service_name>
-    ```
+1. Create the **RETAIL** database user with a suitable password. The default tablespace is `data` in ADB or `users` in DBCS.
 
-3. Create the **RETAIL** database user with a suitable password. The default tablespace is `data` in ADB or `users` in DBCS.
-
+    **ADB:**
     ```
     CREATE USER retail IDENTIFIED BY <password_retail>;
-    ALTER USER retail QUOTA UNLIMITED ON <data/users>;
+    ALTER USER retail QUOTA UNLIMITED ON data;
     ```
 
-4. Grant the required privileges to the **RETAIL** user.
+    **DB:**
+    ```
+    CREATE USER retail IDENTIFIED BY <password_retail>;
+    ALTER USER retail QUOTA UNLIMITED ON users;
+    ```
+
+
+1. Grant the required privileges to the **RETAIL** user.
 
     - The Oracle Graph server by default uses an Oracle database as the identity manager, which means that you log into the graph server using Oracle Database credentials. The Database user needs to be granted appropriate privileges to support this authentication method, mainly the **CREATE SESSION** and  **GRAPH_DEVELOPER** or **GRAPH_ADMINISTRATOR** role.
 
@@ -73,13 +84,13 @@ You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/C
     GRANT connect, resource, create view, graph_developer TO retail;
     ```
 
-5. Connect as the **RETAIL** user.
+1. Connect as the **RETAIL** user.
 
     ```
     $ sqlplus retail/<password_retail>@<service_name>
     ```
 
-6. Create the **TRANSACTIONS** table.
+1. Create the **TRANSACTIONS** table.
 
     ```
     CREATE TABLE transactions (
@@ -96,45 +107,50 @@ You may use [Cloud Shell](https://docs.cloud.oracle.com/en-us/iaas/Content/API/C
 
 ## **STEP 3** : Load the Dataset
 
+Download the [Online Retail dataset](https://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx) using **wget** using a direct download URL from UCI.
+
+```
+$ wget https://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx -O OnlineRetail.xlsx
+```
+
+Alternatively, open with Excel and save the file as `OnlineRetail.csv` in CSV format (Save As > File Format: CSV UTF-8). Then, run `dos2unix` to make the
+
+```
+$ dos2unix OnlineRetail.csv
+```
+
+Once the download completes, convert the Excel file to CSV format using open source **libreoffice**, as the data needs to be converted to plain text for loading. This file conversion takes a few minutes to complete.
+
+```
+$ libreoffice --headless --convert-to csv OnlineRetail.xlsx
+```
+
+**ADB:** Load this CSV data into the database via SQL Developer Web.
+
 1. In the previous SSH connection as the **oracle** user, change directory to **/home/oracle/dataset** as all files for the load are in this folder.
+
+**DB:** Upload this CSV data into the 
 
     ```
     cd /home/oracle/dataset
     ```
 
-2. Download the Online Retail dataset using **wget** using a direct download URL from UCI.
+3. 
+
+
+
+4. Load the CSV file into **TRANSACTIONS** table using **SQL Loader** and the control file provided (control file defines the format of the input file to SQL Loader). Invoke SQL Loader using the following command line, replacing **<password_retail>** and **<service_name>**.
 
     ```
-    $ wget https://archive.ics.uci.edu/ml/machine-learning-databases/00352/Online%20Retail.xlsx -O OnlineRetail.xlsx
-    ```
-
-3. Once the download completes, convert the Excel file to CSV format using open source **libreoffice**, as the data needs to be converted to plain text for loading.
-
-    - The file conversion takes a few minutes to complete.
-
-    ```
-    $ libreoffice --headless --convert-to csv OnlineRetail.xlsx
-    ```
-
-    Alternatively, open with Excel and save the file as `OnlineRetail.csv` in CSV format. (Save As > File Format: CSV UTF-8)
-
-    ```
-    $ dos2unix OnlineRetail.csv
-    ```
-
-4. Load the CSV file into **TRANSACTIONS** table using **SQL Loader** and the control file provided (control file defines the format of the input file to SQL Loader).
-
-  Invoke SQL Loader using the following command line, replacing **{Retail Password}** and **{ADB Service Name}**.
-
-    ```
-    $ sqlldr userid=retail/<password_retail>@<service_name> data=OnlineRetail.csv control=sqlldr.ctl log=sqlldr.log bad=sqlldr.bad direct=true
+    $ sqlldr userid=retail/<password_retail>@<service_name> \
+      data=OnlineRetail.csv control=sqlldr.ctl log=sqlldr.log bad=sqlldr.bad direct=true
     ```
 
 5. Observe that over **540k** rows get loaded from the dataset.
 
 ## **STEP 4** : Populate Tables for Graph
 
-The transactional data that was just loaded needs to be normalized into relational entities, mainly **CUSTOMERS**, **PRODUCTS**, **PURCHASES** and **PURCHASES_DISTINCT**. These tables will be used to build the property graph later.
+The transactional data that was just loaded needs to be normalized into relational entities, **CUSTOMERS**, **PRODUCTS**, **PURCHASES** and **PURCHASES_DISTINCT**. These tables will be used to build the property graph later.
 
 1. Connect as the **RETAIL** user.
 
@@ -142,9 +158,7 @@ The transactional data that was just loaded needs to be normalized into relation
     $ sqlplus retail/<password_retail>@<service_name>
     ```
 
-2. Populate the normalized tables.
-
-    **CUSTOMERS** table:
+1. Populate **CUSTOMERS** table:
 
     ```
     CREATE TABLE customers (
@@ -165,7 +179,7 @@ The transactional data that was just loaded needs to be normalized into relation
     SELECT * FROM customers WHERE ROWNUM <= 5;
     ```
 
-    **PRODUCTS** table:
+1. Populate **PRODUCTS** table:
 
     ```
     CREATE TABLE products (
@@ -187,7 +201,7 @@ The transactional data that was just loaded needs to be normalized into relation
     SELECT * FROM products WHERE ROWNUM <= 5;
     ```
 
-    **PURCHASES** table:
+1. Populate **PURCHASES** table:
 
     ```
     CREATE TABLE purchases (
@@ -214,7 +228,7 @@ The transactional data that was just loaded needs to be normalized into relation
     SELECT * FROM purchases WHERE ROWNUM <= 5;
     ```
 
-    **PURCHASES_DISTINCT** table:
+1. Populate **PURCHASES_DISTINCT** table:
 
     ```
     CREATE TABLE purchases_distinct (
@@ -251,10 +265,12 @@ As part of the Converged Oracle Database, a scalable property graph database alo
 
 Login to the Graph Server VM, and connect to Graph Server as the **RETAIL** user using the Python client. If you use a remote Graph Client,  
 
-    $ opgpy --base_url https://localhost:7007 --user retail
-    enter password for user moneyflows (press Enter for no password): <password_retail>
-    Oracle Graph Server Shell 20.4.0
-    >>>
+```
+$ opgpy --base_url https://localhost:7007 --user retail
+enter password for user moneyflows (press Enter for no password): <password_retail>
+Oracle Graph Server Shell 20.4.0
+>>>
+```
 
 ## **STEP 2** : Create a Graph
 
@@ -263,38 +279,38 @@ Set the create property graph statement.
 ```
 statement = '''
 CREATE PROPERTY GRAPH "Online Retail"
-VERTEX TABLES (
-    online_retail.customers
-    LABEL "Customer"
-    PROPERTIES (
+  VERTEX TABLES (
+    retail.customers
+      LABEL "Customer"
+      PROPERTIES (
         customer_id AS "customer_id"
-    , "country"
-    )
-, online_retail.products
-    LABEL "Product"
-    PROPERTIES (
+      , "country"
+      )
+  , retail.products
+      LABEL "Product"
+      PROPERTIES (
         stock_code AS "stock_code"
-    , "description"
-    )
-)
-EDGE TABLES (
-    online_retail.purchases_distinct
-    KEY (purchase_id)
-    SOURCE KEY(customer_id) REFERENCES customers
-    DESTINATION KEY(stock_code) REFERENCES products
-    LABEL "has_purchased"
-    PROPERTIES (
-        purchase_id
-    )
-, online_retail.purchases_distinct AS purchases_distinct_2
-    KEY (purchase_id)
-    SOURCE KEY(stock_code) REFERENCES products
-    DESTINATION KEY(customer_id) REFERENCES customers
-    LABEL "purchased_by"
-    PROPERTIES (
-        purchase_id
-    )
-)
+      , "description"
+      )
+  )
+  EDGE TABLES (
+    retail.purchases_distinct
+      KEY (purchase_id)
+      SOURCE KEY(customer_id) REFERENCES customers
+      DESTINATION KEY(stock_code) REFERENCES products
+      LABEL "has_purchased"
+      PROPERTIES (
+          purchase_id
+      )
+  , retail.purchases_distinct AS purchases_distinct_2
+      KEY (purchase_id)
+      SOURCE KEY(stock_code) REFERENCES products
+      DESTINATION KEY(customer_id) REFERENCES customers
+      LABEL "purchased_by"
+      PROPERTIES (
+          purchase_id
+      )
+  )
 '''
 ```
 
@@ -331,7 +347,6 @@ Publish the graph to make it available from other sessions.
 ```
 >>> graph.publish()
 ```
-
 
 # Lab 3: Generate Recommendation
 
@@ -410,48 +425,27 @@ graph.query_pgql("""
 
 ## Visualization
 
-Open Graph Visualization (https://localhost:7007/ui) with username: retail, password: <password_retail>.
+Open Graph Visualization (https://localhost:7007/ui) with username: `retail`, password: `<password_retail>`.
 
 ![](https://user-images.githubusercontent.com/4862919/91992834-9084da80-ed6f-11ea-89ee-6d6134c2bb3d.jpg)
 
 Select "Online Retail" graph, and run the query below to see the paths between the customer "cust_12353" and the top recommended product above.
 
-    SELECT *
-    MATCH (c1)-[e1]->(p1)<-[e2]-(c2)-[e3]->(p2)
-    WHERE ID(c1) = 'cust_12353'
-      AND ID(p2) = 'prod_23166'
-      AND ID(c1) != ID(c2)
-      AND ID(p1) != ID(p2)
+```
+SELECT *
+FROM MATCH (c1)-[e1]->(p1)<-[e2]-(c2)-[e3]->(p2)
+WHERE ID(c1) = 'cust_12353'
+  AND ID(p2) = 'prod_23166'
+  AND ID(c1) != ID(c2)
+  AND ID(p1) != ID(p2)
+```
 
 Import [`highlights.json`](https://github.com/ryotayamanaka/oracle-pg/blob/20.3/graphs/online_retail/highlights.json) for adding icons and changing the size of nodes according to the pagerank.
 
 ![](https://user-images.githubusercontent.com/4862919/91992798-86fb7280-ed6f-11ea-9586-8b600c94a8ed.jpg)
 
-## Notebook
-
-Open Zeppelin (http://localhost:8080) and import [`zeppelin.json`](https://github.com/ryotayamanaka/oracle-pg/blob/20.3/graphs/online_retail/zeppelin.json) to load the "Online Retail" note.
-
-You will connect to Graph Server in the first step, and load the graph next. You can access the same graph from Graph Visuzlization using the session ID returned at the first step.
-
 ---
 
-## Appendix 1
+## Appendix
 
 There are two loading configuration files in the directory, [`config-tables.json`](https://github.com/ryotayamanaka/oracle-pg/blob/master/graphs/retail/config-tables.json) and [`config-tables-distinct.json`](https://github.com/ryotayamanaka/oracle-pg/blob/master/graphs/retail/config-tables-distinct.json). The former counts all duplicated purchases (when customers has purchased the same products multiple times), while such duplicated edges are merged in the latter. We use the distinct version for making recommendations here.
-
-## Appendix 2
-
-For pre-loading the graph into Graph Server, add these two entries to conf/pgx.conf.
-
-    {
-      "authorization": [
-        "pgx_permissions": [
-        , { "preloaded_graph": "Online Retail", "grant": "READ"}            <--
-
-      "preload_graphs": [
-      , {"path": "/graphs/online_retail/config-tables-distinct.json", "name": "Online Retail"}   <--
-
-Restart Graph Server.
-
-    $ cd oracle-pg/
-    $ docker-compose restart graph-server
